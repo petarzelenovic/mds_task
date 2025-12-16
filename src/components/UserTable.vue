@@ -18,12 +18,21 @@
       <option value="25">25</option>
       <option value="50">50</option>
     </select>
+
+    <div class="pagination">
+      <button :disabled="page <= 1" @click="handlePreviousPage"><</button>
+      <span> {{ page }}</span>
+      <button :disabled="page === numberOfPages" @click="handleNextPage">
+        >
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import TableRow from "./TableRow.vue";
 import useQueryParams from "../composables/useQueryParams";
+import { computed } from "vue";
 
 defineProps({
   data: {
@@ -40,12 +49,20 @@ defineProps({
   },
 });
 
-const { limit } = useQueryParams();
-
-const emit = defineEmits(["limitChange"]);
+const { limit, totalCount, page } = useQueryParams();
+const numberOfPages = computed(() => totalCount.value / limit.value);
+const emit = defineEmits(["limitChange", "changePage"]);
 
 function handleLimitChange(event) {
   emit("limitChange", event.target.value);
+}
+
+function handlePreviousPage() {
+  emit("changePage", "previous");
+}
+
+function handleNextPage() {
+  emit("changePage", "next");
 }
 </script>
 

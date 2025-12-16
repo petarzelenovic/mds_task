@@ -1,10 +1,11 @@
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
+const totalCount = ref(0);
 export default function useQueryParams() {
   const route = useRoute();
   const page = computed(() => Number(route.query._page) || 1);
   const limit = computed(() => Number(route.query._limit) || 10);
 
-  return { page, limit };
+  return { page, limit, totalCount };
 }
