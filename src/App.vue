@@ -3,14 +3,14 @@
     v-if="!isLoading"
     :data="users"
     :columns="columns"
-    @limitChange="updateLimitQuery"
+    @limit-change="updateLimitQuery"
     @change-page="updatePageQuery"
   >
   </UserTable>
 </template>
 
 <script setup>
-import { onMounted, ref, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import UserTable from "./components/UserTable.vue";
 import { useRoute, useRouter } from "vue-router";
 import useQueryParams from "./composables/useQueryParams";
@@ -57,10 +57,6 @@ watch(
     fetchData();
   }
 );
-
-onMounted(() => {
-  fetchData();
-});
 </script>
 
 <style scoped></style>
