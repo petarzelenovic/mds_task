@@ -3,8 +3,10 @@
     v-if="!isLoading"
     :data="users"
     :columns="columns"
+    v-model:searchQuery="q"
     @limit-change="updateLimitQuery"
     @change-page="updatePageQuery"
+    @search-filter="updateSearchQuery"
   >
   </UserTable>
 </template>
@@ -20,12 +22,12 @@ const router = useRouter();
 const isLoading = ref(true);
 const users = ref([]);
 
-const { limit, page, totalCount } = useQueryParams();
+const { limit, page, totalCount, q } = useQueryParams();
 
 async function fetchData() {
   isLoading.value = true;
   const response = await fetch(
-    `/api/users?_page=${page.value}&_limit=${limit.value}`
+    `/api/users?_page=${page.value}&_limit=${limit.value}&q=${q.value}`
   );
   totalCount.value = response.headers.get("X-Total-Count");
   users.value = await response.json();
@@ -44,6 +46,10 @@ function updatePageQuery(event) {
     newPage = page.value - 1;
   }
   router.push({ path: "/", query: { ...route.query, _page: newPage } });
+}
+
+function updateSearchQuery(value) {
+  router.push({ path: "/", query: { ...route.query, q: value } });
 }
 
 const columns = computed(() => {

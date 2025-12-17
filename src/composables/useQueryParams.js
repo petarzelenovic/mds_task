@@ -6,6 +6,6 @@ export default function useQueryParams() {
   const route = useRoute();
   const page = computed(() => Number(route.query._page) || 1);
   const limit = computed(() => Number(route.query._limit) || 10);
-
-  return { page, limit, totalCount };
+  const q = computed(() => route.query.q || "");
+  return { page, limit, totalCount, q };
 }

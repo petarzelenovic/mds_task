@@ -26,6 +26,16 @@
         >
       </button>
     </div>
+
+    <div class="search">
+      <input
+        type="text"
+        class="searchBar"
+        v-model="searchQuery"
+        @input="handleSearchDebounced"
+      />
+      {{ searchQuery }}
+    </div>
   </div>
 </template>
 
@@ -33,6 +43,7 @@
 import TableRow from "./TableRow.vue";
 import useQueryParams from "../composables/useQueryParams";
 import { computed } from "vue";
+import { debounceFn } from "../utils/debouceFn";
 
 defineProps({
   data: {
@@ -49,9 +60,13 @@ defineProps({
   },
 });
 
+const emit = defineEmits(["limitChange", "changePage", "searchFilter"]);
+
+const searchQuery = defineModel("searchQuery");
 const { limit, totalCount, page } = useQueryParams();
-const numberOfPages = computed(() => totalCount.value / limit.value);
-const emit = defineEmits(["limitChange", "changePage"]);
+const numberOfPages = computed(() =>
+  Math.round(totalCount.value / limit.value)
+);
 
 function handleLimitChange(event) {
   emit("limitChange", event.target.value);
@@ -64,6 +79,12 @@ function handlePreviousPage() {
 function handleNextPage() {
   emit("changePage", "next");
 }
+
+function handleSearchInput(event) {
+  emit("searchFilter", event.target.value);
+}
+
+const handleSearchDebounced = debounceFn(handleSearchInput, 500);
 </script>
 
 <style scoped>
