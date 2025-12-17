@@ -14,15 +14,22 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import UserTable from "./components/UserTable.vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import useQueryParams from "./composables/useQueryParams";
 
 const route = useRoute();
-const router = useRouter();
 const isLoading = ref(true);
 const users = ref([]);
 
-const { limit, page, totalCount, q } = useQueryParams();
+const {
+  limit,
+  page,
+  totalCount,
+  q,
+  updateLimitQuery,
+  updatePageQuery,
+  updateSearchQuery,
+} = useQueryParams();
 
 async function fetchData() {
   isLoading.value = true;
@@ -32,24 +39,6 @@ async function fetchData() {
   totalCount.value = response.headers.get("X-Total-Count");
   users.value = await response.json();
   isLoading.value = false;
-}
-
-function updateLimitQuery(newLimit) {
-  router.push({ path: "/", query: { ...route.query, _limit: newLimit } });
-}
-
-function updatePageQuery(event) {
-  let newPage = page.value;
-  if (event === "next") {
-    newPage = page.value + 1;
-  } else {
-    newPage = page.value - 1;
-  }
-  router.push({ path: "/", query: { ...route.query, _page: newPage } });
-}
-
-function updateSearchQuery(value) {
-  router.push({ path: "/", query: { ...route.query, q: value } });
 }
 
 const columns = computed(() => {
