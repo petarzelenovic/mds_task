@@ -1,6 +1,11 @@
 <template>
   <div v-if="showHeader" class="row header">
-    <div class="cell" v-for="column in columns" :key="column">
+    <div
+      class="cell"
+      v-for="column in columns"
+      :key="column"
+      @click="handleSort(column)"
+    >
       {{ column }}
     </div>
   </div>
@@ -68,7 +73,7 @@
 <script setup>
 import TableRow from "./TableRow.vue";
 import useQueryParams from "../composables/useQueryParams";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { debounceFn } from "../utils/debouceFn";
 
 defineProps({
@@ -92,10 +97,14 @@ const emit = defineEmits([
   "searchFilter",
   "countryFilter",
   "roleFilter",
+  "sortChange",
 ]);
 
 const searchQuery = defineModel("searchQuery");
-const { limit, totalCount, page, countryId, roleName } = useQueryParams();
+const { limit, totalCount, page, countryId, roleName, sortKey, sortOrder } =
+  useQueryParams();
+const sortKeyLocal = ref(sortKey.value);
+const sortOrderLocal = ref(sortOrder.value);
 const numberOfPages = computed(() =>
   Math.round(totalCount.value / limit.value)
 );
@@ -122,6 +131,20 @@ function handleCountryChange(event) {
 
 function handleRoleChange(event) {
   emit("roleFilter", event.target.value);
+}
+
+function handleSort(column) {
+  if (sortKeyLocal.value === column) {
+    sortOrderLocal.value = sortOrderLocal.value === "asc" ? "desc" : "asc";
+  } else {
+    sortKeyLocal.value = column;
+    sortOrderLocal.value = "asc";
+  }
+
+  emit("sortChange", {
+    sort: sortKeyLocal.value,
+    order: sortOrderLocal.value,
+  });
 }
 
 const handleSearchDebounced = debounceFn(handleSearchInput, 500);

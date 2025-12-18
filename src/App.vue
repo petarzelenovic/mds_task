@@ -9,6 +9,7 @@
     @search-filter="updateSearchQuery"
     @country-filter="updateCountryQuery"
     @role-filter="updateRoleQuery"
+    @sort-change="updateSortQuery"
   >
   </UserTable>
 </template>
@@ -35,11 +36,14 @@ const {
   q,
   countryId,
   roleName,
+  sortKey,
+  sortOrder,
   updateLimitQuery,
   updatePageQuery,
   updateSearchQuery,
   updateCountryQuery,
   updateRoleQuery,
+  updateSortQuery,
 } = useQueryParams();
 
 async function fetchData() {
@@ -60,6 +64,8 @@ async function fetchData() {
   if (q.value) params.append("q", q.value);
   if (countryId.value !== 0) params.append("country.id", countryId.value);
   if (roleName.value !== "default") params.append("role.name", roleName.value);
+  if (sortKey.value) params.append("_sort", sortKey.value);
+  if (sortOrder.value) params.append("_order", sortOrder.value);
 
   // TODO: cover a case when we get 0 users based on filters, add error handling..
   const response = await fetch(`/api/users?${params}`);
