@@ -27,11 +27,16 @@ export default function useQueryParams() {
     router.push({ path: "/", query: { ...route.query, "country.id": value } });
   }
 
+  function updateRoleQuery(value) {
+    router.push({ path: "/", query: { ...route.query, "role.name": value } });
+  }
+
   const route = useRoute();
   const page = computed(() => Number(route.query._page) || 1);
   const limit = computed(() => Number(route.query._limit) || 10);
   const q = computed(() => route.query.q || "");
   const countryId = computed(() => route.query["country.id"] || 0);
+  const roleName = computed(() => route.query["role.name"] || "default");
 
   return {
     page,
@@ -39,9 +44,11 @@ export default function useQueryParams() {
     totalCount,
     q,
     countryId,
+    roleName,
     updateLimitQuery,
     updatePageQuery,
     updateSearchQuery,
     updateCountryQuery,
+    updateRoleQuery,
   };
 }

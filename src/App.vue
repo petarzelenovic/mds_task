@@ -8,6 +8,7 @@
     @change-page="updatePageQuery"
     @search-filter="updateSearchQuery"
     @country-filter="updateCountryQuery"
+    @role-filter="updateRoleQuery"
   >
   </UserTable>
 </template>
@@ -33,10 +34,12 @@ const {
   totalCount,
   q,
   countryId,
+  roleName,
   updateLimitQuery,
   updatePageQuery,
   updateSearchQuery,
   updateCountryQuery,
+  updateRoleQuery,
 } = useQueryParams();
 
 async function fetchData() {
@@ -47,10 +50,19 @@ async function fetchData() {
   }
 
   isLoading.value = true;
-  // change this later, some query params may be missing
-  const response = await fetch(
-    `/api/users?_page=${page.value}&_limit=${limit.value}&q=${q.value}&country.id=${countryId.value}`
-  );
+
+  // TODO: move to a separate function
+  const params = new URLSearchParams({
+    _page: page.value,
+    _limit: limit.value,
+  });
+
+  if (q.value) params.append("q", q.value);
+  if (countryId.value !== 0) params.append("country.id", countryId.value);
+  if (roleName.value !== "default") params.append("role.name", roleName.value);
+
+  // TODO: cover a case when we get 0 users based on filters, add error handling..
+  const response = await fetch(`/api/users?${params}`);
   totalCount.value = response.headers.get("X-Total-Count");
   users.value = await response.json();
   completeData.value = { users, roles, countries };

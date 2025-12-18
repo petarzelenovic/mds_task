@@ -49,6 +49,18 @@
           {{ country.name || "Missing country name" }}
         </option>
       </select>
+
+      <select
+        name="role"
+        id="role"
+        @change="handleRoleChange"
+        :value="roleName"
+      >
+        <option :value="'default'">--Please choose a role--</option>
+        <option v-for="role in data.roles" :value="role.name" :key="role.id">
+          {{ role.name || "Missing role name" }}
+        </option>
+      </select>
     </div>
   </div>
 </template>
@@ -61,7 +73,7 @@ import { debounceFn } from "../utils/debouceFn";
 
 defineProps({
   data: {
-    type: Array,
+    type: Object,
     required: true,
   },
   columns: {
@@ -74,10 +86,16 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["limitChange", "changePage", "searchFilter"]);
+const emit = defineEmits([
+  "limitChange",
+  "changePage",
+  "searchFilter",
+  "countryFilter",
+  "roleFilter",
+]);
 
 const searchQuery = defineModel("searchQuery");
-const { limit, totalCount, page, countryId } = useQueryParams();
+const { limit, totalCount, page, countryId, roleName } = useQueryParams();
 const numberOfPages = computed(() =>
   Math.round(totalCount.value / limit.value)
 );
@@ -100,6 +118,10 @@ function handleSearchInput(event) {
 
 function handleCountryChange(event) {
   emit("countryFilter", event.target.value);
+}
+
+function handleRoleChange(event) {
+  emit("roleFilter", event.target.value);
 }
 
 const handleSearchDebounced = debounceFn(handleSearchInput, 500);
