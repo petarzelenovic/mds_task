@@ -5,7 +5,7 @@
     </div>
   </div>
   <TableRow
-    v-for="user in data"
+    v-for="user in data.users"
     :key="user.id"
     :row-data="user"
     :columns="columns"
@@ -34,7 +34,21 @@
         v-model="searchQuery"
         @input="handleSearchDebounced"
       />
-      {{ searchQuery }}
+      <select
+        name="country"
+        id="country"
+        @change="handleCountryChange"
+        :value="countryId"
+      >
+        <option :value="0">--Please choose a country--</option>
+        <option
+          v-for="country in data.countries"
+          :value="country.id"
+          :key="country.id"
+        >
+          {{ country.name || "Missing country name" }}
+        </option>
+      </select>
     </div>
   </div>
 </template>
@@ -63,7 +77,7 @@ defineProps({
 const emit = defineEmits(["limitChange", "changePage", "searchFilter"]);
 
 const searchQuery = defineModel("searchQuery");
-const { limit, totalCount, page } = useQueryParams();
+const { limit, totalCount, page, countryId } = useQueryParams();
 const numberOfPages = computed(() =>
   Math.round(totalCount.value / limit.value)
 );
@@ -82,6 +96,10 @@ function handleNextPage() {
 
 function handleSearchInput(event) {
   emit("searchFilter", event.target.value);
+}
+
+function handleCountryChange(event) {
+  emit("countryFilter", event.target.value);
 }
 
 const handleSearchDebounced = debounceFn(handleSearchInput, 500);

@@ -23,18 +23,25 @@ export default function useQueryParams() {
     router.push({ path: "/", query: { ...route.query, q: value } });
   }
 
+  function updateCountryQuery(value) {
+    router.push({ path: "/", query: { ...route.query, "country.id": value } });
+  }
+
   const route = useRoute();
   const page = computed(() => Number(route.query._page) || 1);
   const limit = computed(() => Number(route.query._limit) || 10);
   const q = computed(() => route.query.q || "");
+  const countryId = computed(() => route.query["country.id"] || 0);
 
   return {
     page,
     limit,
     totalCount,
     q,
+    countryId,
     updateLimitQuery,
     updatePageQuery,
     updateSearchQuery,
+    updateCountryQuery,
   };
 }
