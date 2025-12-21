@@ -47,6 +47,21 @@ export default function useQueryParams() {
   const sortKey = computed(() => route.query._sort || "");
   const sortOrder = computed(() => route.query._order || "");
 
+  function buildQueryParams() {
+    const params = new URLSearchParams({
+      _page: page.value,
+      _limit: limit.value,
+    });
+
+    if (q.value) params.append("q", q.value);
+    if (Number(countryId.value)!==0) params.append("country.id", countryId.value);
+    if (roleName.value !== "default") params.append("role.name", roleName.value);
+    if (sortKey.value) params.append("_sort", sortKey.value);
+    if (sortOrder.value) params.append("_order", sortOrder.value);
+
+    return params;
+  }
+
   return {
     page,
     limit,
@@ -62,5 +77,6 @@ export default function useQueryParams() {
     updateCountryQuery,
     updateRoleQuery,
     updateSortQuery,
+    buildQueryParams
   };
 }

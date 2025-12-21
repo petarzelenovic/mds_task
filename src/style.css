@@ -80,8 +80,7 @@ button:focus-visible {
 
 .row {
   display: grid;
-  grid-template-columns:
-    40px 120px 140px 260px 80px 160px 160px;   
+  grid-template-columns: 2fr 3fr 4fr 5fr 2.5fr 4fr 4fr 1fr;
   align-items: center;
   gap: 12px;
 }

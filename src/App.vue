@@ -1,6 +1,8 @@
 <template>
+  <div v-if="isLoading">Loading...</div>
+  <!-- add loading spinner -->
   <UserTable
-    v-if="!isLoading"
+    v-else
     :data="completeData"
     :columns="columns"
     v-model:searchQuery="q"
@@ -10,12 +12,13 @@
     @country-filter="updateCountryQuery"
     @role-filter="updateRoleQuery"
     @sort-change="updateSortQuery"
+    @delete-user="deleteUser"
   >
   </UserTable>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import UserTable from "./components/UserTable.vue";
 import { useRoute } from "vue-router";
 import useQueryParams from "./composables/useQueryParams";
@@ -25,54 +28,46 @@ const isLoading = ref(true);
 const users = ref([]);
 const countries = ref([]);
 const roles = ref([]);
-const completeData = ref([]);
+const completeData = computed(() => ({
+  users: users.value,
+  roles: roles.value,
+  countries: countries.value,
+}));
 
 const firstFetch = ref(true);
 
 const {
-  limit,
-  page,
   totalCount,
   q,
-  countryId,
-  roleName,
-  sortKey,
-  sortOrder,
   updateLimitQuery,
   updatePageQuery,
   updateSearchQuery,
   updateCountryQuery,
   updateRoleQuery,
   updateSortQuery,
+  buildQueryParams,
 } = useQueryParams();
 
 async function fetchData() {
-  if (firstFetch.value) {
-    fetchCountryData();
-    fetchRolesData();
-    firstFetch.value = false;
+  try {
+    if (firstFetch.value) {
+      await Promise.all([fetchCountryData(), fetchRolesData()]);
+      firstFetch.value = false;
+    }
+
+    isLoading.value = true;
+
+    const params = buildQueryParams();
+    // TODO: cover a case when we get 0 users based on filters..
+    const response = await fetch(`/api/users?${params}`);
+    totalCount.value = response.headers.get("X-Total-Count");
+    users.value = await response.json();
+  } catch (err) {
+    console.log(err);
+    users.value = [];
+  } finally {
+    isLoading.value = false;
   }
-
-  isLoading.value = true;
-
-  // TODO: move to a separate function
-  const params = new URLSearchParams({
-    _page: page.value,
-    _limit: limit.value,
-  });
-
-  if (q.value) params.append("q", q.value);
-  if (countryId.value !== 0) params.append("country.id", countryId.value);
-  if (roleName.value !== "default") params.append("role.name", roleName.value);
-  if (sortKey.value) params.append("_sort", sortKey.value);
-  if (sortOrder.value) params.append("_order", sortOrder.value);
-
-  // TODO: cover a case when we get 0 users based on filters, add error handling..
-  const response = await fetch(`/api/users?${params}`);
-  totalCount.value = response.headers.get("X-Total-Count");
-  users.value = await response.json();
-  completeData.value = { users, roles, countries };
-  isLoading.value = false;
 }
 
 async function fetchCountryData() {
@@ -85,17 +80,23 @@ async function fetchRolesData() {
   roles.value = await response.json();
 }
 
-const columns = computed(() => {
-  if (!users.value.length) return [];
-  return Object.keys(users.value[0]);
-});
+async function deleteUser(user) {
+  await fetch(`api/users/${user.id}`, {
+    method: "DELETE",
+  });
+  await fetchData();
+}
 
-watch(
-  () => route.query,
-  () => {
-    fetchData();
-  }
-);
+const columns = [
+  "id",
+  "firstName",
+  "lastName",
+  "email",
+  "avatar",
+  "country",
+  "role",
+];
+watch(() => route.query, fetchData);
 </script>
 
 <style scoped></style>

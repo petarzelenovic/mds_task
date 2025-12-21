@@ -10,11 +10,14 @@
       <span v-else-if="rowData[column]?.name">{{ rowData[column].name }}</span>
       <span v-else>{{ rowData[column] }}</span>
     </div>
+    <div class="cell">
+      <button @click="handleDeleteUser">Delete</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   rowData: {
     type: Object,
     required: true,
@@ -26,6 +29,15 @@ defineProps({
     default: () => [],
   },
 });
+
+const emit = defineEmits(["deleteUser"]);
+function handleDeleteUser() {
+  // add custom popUp component..
+  const result = confirm("Do you want to delete a user?");
+  if (result) {
+    emit("deleteUser", props.rowData);
+  }
+}
 
 function avatarPath(path) {
   const defaultAvatar =
